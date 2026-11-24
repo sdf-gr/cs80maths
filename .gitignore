@@ -1,0 +1,7 @@
+build/
+dist/
+tmp/
+*-log.txt
+*.xcuserstate
+xcuserdata/
+.DS_Store

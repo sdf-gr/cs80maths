@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yamaha CS-80: electronics and connections</title>
+<style>
+body { max-width: 78ch; margin: 3rem auto; padding: 0 1.25rem; color: #171717; background: #fff; font: 18px/1.65 Georgia, serif; }
+h1,h2,h3 { line-height: 1.25; }
+h1 { font-size: 2rem; }
+h2 { margin-top: 2.5rem; font-size: 1.45rem; }
+h3 { margin-top: 1.7rem; font-size: 1.15rem; }
+p { margin: 0.8rem 0; }
+@media print { body { max-width: none; margin: 0; font-size: 11pt; } h2,h3 { break-after: avoid; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Yamaha CS-80: electronics and connections</h1>
+<p>An essay from Direct Grooves, accompanying cs80maths.</p>
+<p>cs80maths generates sound mathematically and studies the architecture described here. Its filters, envelopes and effects are software approximations; this essay describes the original instrument and does not claim that the app reproduces every circuit or its measured sound.</p>
+<p>This reference explains the CS-80 as an electronic instrument: what each functional component does, the electronic devices used to build it, and how it connects to the rest of the machine. It covers the keyboard, note assignment, sixteen synthesizer voices, control circuits, presets, memories, effects, pedals, outputs, and power supply. It follows the supplied service manual for instruments beginning with serial number 1001, together with the supplied owner's manual.</p>
+<p>Here, “component” includes a circuit section, an integrated circuit, a control, or a supporting electronic part. This is a functional explanation of the complete instrument, not a pin-by-pin netlist or an inventory of every resistor, capacitor, solder joint, and wire. Individual values are included where they clarify operation and can be read reliably. Yamaha's proprietary chips are described through their documented connections and behavior; their complete internal transistor circuits are not supplied in these manuals.</p>
+<p>References use PDF page numbers, counting the first PDF page as page 1. The service manual's printed page numbers generally differ from these. Where circuit behavior has not been established precisely, the text says so instead of assigning an invented value or circuit law.</p>
+
+<h2>1. The complete instrument</h2>
+<p>The CS-80 is an eight-note polyphonic synthesizer with two simultaneous sound channels, I and II. Each assigned key operates one complete voice in each channel. There are therefore sixteen main oscillators, sixteen high-pass filters, sixteen low-pass filters, sixteen filter envelope generators, and sixteen amplitude envelope generators. Channel I uses voice boards M11 through M18. Channel II uses M21 through M28. A key is shared between the two corresponding voices, but their waveforms, filter settings, envelopes, levels, and programmed touch response can differ.</p>
+<p>For each voice, the main oscillator and waveshaper provide sawtooth, pulse, and sine signals. Sawtooth, pulse, and noise enter the high-pass filter, followed by the low-pass filter. The sine takes a separate route around the filters. The filtered and sine contributions are controlled by their respective level circuits, then subjected to amplitude modulation and envelope control. The voice outputs are combined within their channel. The MIX control blends the two channels, and the common circuits provide ring modulation, expression, stereo tremolo/chorus processing, and output conditioning.</p>
+<p>The instrument carries two fundamentally different kinds of electrical signal. An audio signal is the waveform eventually heard. A control signal changes oscillator pitch, filter cutoff, resonance, amplitude, or timing. An envelope does not carry the musical audio; it controls the circuit through which the audio passes. The keyboard's digital codes form a third category: information describing notes and assignments rather than sound.</p>
+<p>Sources: owner's manual, PDF pages 35 and 45–49; service manual, PDF pages 42–43 and 71–74.</p>
+
+<h2>2. The electronic building blocks</h2>
+<h3>Resistors and resistor networks</h3>
+<p>Resistors set currents, divide voltages, establish amplifier gain, and combine signals. In a summing circuit, several inputs reach an amplifier through separate resistors; the resistor ratios determine the contribution of each source. Precision resistor networks are especially important in the key-voltage converter and pitch-reference circuits. In the preset matrices, fixed resistors encode control settings that would otherwise come from a slider.</p>
+<h3>Capacitors</h3>
+<p>Capacitors store charge. In the oscillator, a timing capacitor participates in producing a repeating ramp. In an envelope generator, charge and discharge behavior produces a changing control voltage. In a filter, capacitors help establish frequency-dependent response. Coupling capacitors pass changing audio while blocking unwanted DC offsets. Supply bypass capacitors provide a local path for electrical disturbances, and the larger reservoir capacitors in the power supply reduce rectified mains ripple.</p>
+<h3>Potentiometers and trimmers</h3>
+<p>A panel slider or rotary potentiometer is a movable resistance or voltage divider. Its wiper supplies an adjustable voltage or resistance to a circuit. A slider normally controls all eight voices of its channel through shared control wiring; audio is not necessarily routed through the slider itself. Internal trimmers calibrate pitch, offsets, signal balance, and sensitivity. The service manual distinguishes these calibration parts from the performance controls.</p>
+<h3>Diodes, bipolar transistors, and field-effect transistors</h3>
+<p>Diodes steer current, isolate selected paths, shape signals, and establish or limit voltages. Diode matrices allow one selected preset to influence many control lines without directly joining all presets together. Zener diodes provide voltage-reference or limiting functions. Bipolar transistors appear in buffers, switching circuits, current-control stages, and supply regulators. Field-effect transistors appear as high-impedance devices and electrically operated gates. Their exact purpose depends on the connections around them; a transistor's part number alone does not establish its role.</p>
+<h3>Operational amplifiers and analog switches</h3>
+<p>Operational amplifiers buffer, add, subtract, amplify, and filter signals. Devices shown in the instrument include NJM4558, HA1452 variants, CA3140, and TA7504 devices in their respective circuit positions. A buffer prevents one circuit from loading another. An analog switch electronically connects or disconnects a voltage path. The sample-and-hold circuits use this kind of switching to capture individual key voltages from the shared conversion system.</p>
+<h3>Digital logic and proprietary analog chips</h3>
+<p>The keyboard section uses logic gates, flip-flops, multiplexing, and Yamaha large-scale integrated circuits. These decide which key belongs to which voice. The audio section uses Yamaha analog ICs for oscillation, waveshaping, filtering, voltage-controlled gain, and envelopes. A digital keyboard controller does not make the original sound generation digital: its note information is converted into analog voltages before controlling the voices.</p>
+<p>Sources: service manual, board schematics and parts annotations throughout, particularly PDF pages 5–9, 28–31, and 42–43.</p>
+
+<h2>3. Keyboard contacts and touch sensors</h2>
+<h3>The 61-key contact assembly</h3>
+<p>Each key operates a changeover contact arrangement. As the key begins moving, one contact opens; near the bottom of the movement, another contact closes. The difference in time between these events provides initial-touch information. Faster travel produces a stronger initial-touch response. Key contacts connect to the keyboard interface and coding circuits, which determine both the note identity and the timing information associated with it.</p>
+<h3>Initial touch: the velocity-sensitive path</h3>
+<p>The timing electronics turn key travel time into an analog control signal. The owner's manual describes this as a pulse whose magnitude depends on the speed of the strike. This signal feeds the initial-brilliance, initial-level, and initial-pitchbend paths through their amount controls and associated conditioning circuits. It is important that the original initial response has a time behavior: it is not adequately described as a permanent volume multiplier stored with a note.</p>
+<h3>After touch: the pressure-sensitive path</h3>
+<p>A pressure-sensitive assembly beneath each key changes its electrical behavior as force increases after the key reaches the bottom. The pressure voltage is associated with the assigned voice, allowing one held note to change independently of other held notes. The touch electronics distribute these signals to the brilliance, amplitude, and modulation-control paths. This is polyphonic aftertouch, rather than a single pressure value for the entire keyboard.</p>
+<p>The manuals describe the sensor's variable electrical response but do not provide a complete material formulation or manufacturing specification for its pressure-sensitive element. The sensor should therefore be described as a pressure-dependent electrical assembly, without inventing its chemical composition.</p>
+<p>Sources: owner's manual, PDF pages 14, 27, and 47–48; service manual, PDF pages 10–27.</p>
+
+<h2>4. KAS: key coding, assignment, and key-voltage conversion</h2>
+<h3>YM26600 key coder and key assigner</h3>
+<p>The YM26600 receives note and octave information from the keyboard interface. Its internal digital logic recognizes the keys being held and distributes their codes among eight available assignments. It supplies note-code, octave-code, key-on, and synchronization information to the following circuits. A master clock and synchronization signals organize the time-shared data so that each voice receives the information intended for it.</p>
+<p>The owner's manual states that successive strikes of one key pass through the eight voice circuits in sequence. It also states that holding eight keys and pressing a ninth does not create a new note until an assignment becomes available. This assignment behavior is part of the instrument's response. It is separate from the two-channel layering: each assignment still drives both corresponding channel voices.</p>
+<h3>YM26700 digital-to-analog converter</h3>
+<p>The YM26700 receives time-shared note and octave codes. External resistor ladders and reference voltages allow it to produce the corresponding analog key voltages. The octave examples in the service manual use 0.25, 0.5, 1, 2, and 4 volts. The resulting pitch-control system must not be mistaken for a generic one-volt-per-octave connection; the original voice oscillator responds to the particular key-voltage system used here.</p>
+<p>The converter supplies eight channel key-voltage outputs to the subsequent voice-control system. It also participates in portamento and glissando through its enable and clock inputs. Varying the portamento/glissando clock changes how quickly the note conversion moves toward its destination. The note-voltage network, clocking, and sample-and-hold stages work together; the sound is not produced by reading an audio sample from digital memory.</p>
+<h3>Clock, logic levels, and initialization</h3>
+<p>The documented key-coder clock is approximately 94.5 kHz. The relevant keyboard logic uses supply levels identified as +8.5 V and −6.5 V. Its signal polarity and thresholds must be read in that context rather than assumed to match modern 5 V or 3.3 V logic. Initialization circuitry establishes a defined state when power is applied.</p>
+<p>Sources: service manual, PDF pages 5–7; owner's manual, PDF pages 47–48.</p>
+
+<h2>5. SH: sample-and-hold circuits</h2>
+<p>The SH board separates a time-dependent stream of control information into voltages that individual voices can retain. Analog switches briefly connect the appropriate input to a storage capacitor. When the switch opens, the capacitor holds the captured voltage, and a high-input-impedance buffer presents it to the voice circuitry without rapidly discharging it.</p>
+<p>The service drawing identifies CA4016P analog-switch devices, CA3140T buffer devices, storage capacitors, and individual adjustment controls. Key-voltage and trigger wiring connects this board to KAS and to the voice banks. Sustain-related control also reaches SH, so the handling of a released key is coordinated with the selected performance-sustain mode rather than determined by the oscillator alone.</p>
+<p>This is control-voltage storage, not storage of a recorded waveform. Leakage, offsets, and adjustment differences are physical characteristics of the analog system. Their exact contribution to pitch behavior requires measurement rather than an arbitrary software randomization setting.</p>
+<p>Sources: service manual, PDF pages 8–9.</p>
+
+<h2>6. TKC, TSB1, TSB2, and TWS: keyboard and touch distribution</h2>
+<h3>TKC interface logic</h3>
+<p>TKC connects the keyboard-related signals to the coded, synchronized voice-assignment system. Its schematic uses CMOS logic families including TC4011, TC4016, TC4019, and TC4071 devices in the positions identified by the board notes. These provide logic combinations and switching rather than audio synthesis. Note codes, octave information, synchronization, and voice-related signals pass between TKC, KAS, and the touch-interface boards.</p>
+<h3>TSB1 and TSB2 keyboard interface boards</h3>
+<p>TSB1 and TSB2 distribute the keyboard wiring across two boards. They connect the individual key-contact and touch lines to the multiplexed interface. Their circuits include diode networks, capacitors, TC4051 analog multiplexers where specified, and NJM4558 amplifier stages. Multiplexing allows many key-related electrical signals to be handled through a smaller shared interface while preserving their identities.</p>
+<p>The diagrams show individual connections for notes across the keyboard, along with links to TKC and the common supplies. These boards are therefore part of the sensing and routing system. They are not a bank of sixty-one audio oscillators.</p>
+<h3>TWS and the assigned touch paths</h3>
+<p>TWS connects the keyboard-interface outputs to the per-assignment touch-processing paths. The wiring identifies separate groups continuing to TRG1, TRG2, and TRG4, together with connections to key-assignment and trigger circuitry. Switching and conditioning preserve the relationship between a physical key's touch information and the voice that currently plays that key.</p>
+<p>The board names alone do not describe the entire algorithm. Exact switching order and timing must be obtained from the schematic connections and clock relationships; they should not be replaced with a guessed expansion of an abbreviated board name.</p>
+<p>Sources: service manual, PDF pages 10–19.</p>
+
+<h2>7. TRG1 through TRG5: touch-response processing</h2>
+<p>The TRG boards process and scale the assigned touch signals before those signals reach the voices and common modulation circuits. The circuits use repeated Yamaha IG00151 voltage-controlled amplifier stages, external resistors, capacitors, and calibration trimmers. Repeated stages provide individual adjustment for the eight assignments. A voltage-controlled amplifier in this section may scale a control signal; it does not necessarily carry audible sound.</p>
+<h3>TRG1 and TRG2</h3>
+<p>The wiring for TRG1 and TRG2 includes the initial- and after-touch brilliance and level paths, with separate connections into the R51/R52 distribution system and the channel tone-control system. The panel's INITIAL BRILLIANCE and INITIAL LEVEL amounts determine how much of the strike-dependent signal affects the filters and amplitude. AFTER BRILLIANCE and AFTER LEVEL similarly scale the pressure-dependent contributions. These contributions are combined with the basic programmed settings downstream.</p>
+<h3>TRG3</h3>
+<p>TRG3 connects pressure-dependent modulation processing to the global VCO and VCF touch-response controls and to the modulation distribution system. Its repeated IG00151 stages allow touch information to determine how much of the modulation signal reaches a voice's pitch or filter-control path. Increasing the panel amount increases sensitivity to pressure rather than directly generating a new audio waveform.</p>
+<h3>TRG4</h3>
+<p>TRG4 includes the initial-pitchbend connection and assigned initial-touch paths. The PITCHBEND amount controls the strike-related pitch excursion. The resulting signal lowers pitch at the beginning of a note and then allows it to recover. This electronic path connects to pitch-control mixing, not to the main audio output. Additional initial-touch level connections are identified in the board wiring.</p>
+<h3>TRG5</h3>
+<p>TRG5 connects the pressure-related SPEED control to the common suboscillator control system and distributes modulation-related assigned signals. The service wiring identifies its link to the SUB board's oscillator-control input. Because this path influences a common modulation source, pressure-sensitive speed behavior cannot be assumed to mean eight completely independent low-frequency oscillators.</p>
+<p>These board descriptions identify the functional connections visible in the manuals. A complete numerical touch-response model still needs the transfer law and timing of each connected stage, including how simultaneous pressure signals influence a common control.</p>
+<p>Sources: service manual, PDF pages 20–27; owner's manual, PDF pages 14, 27, 40, and 48.</p>
+
+<h2>8. KBC1 and KBC2: keyboard-position controls</h2>
+<p>KBC1 and KBC2 derive control information from the position of each assigned note on the keyboard. The related circuitry uses coded note information, conversion, resistor networks, and switching to produce voltages for the lower and upper keyboard regions. These voltages pass through the LOW and HIGH brilliance and level controls and then into the control-distribution system.</p>
+<p>LOW BRILLIANCE changes filter control progressively toward the bass end; HIGH BRILLIANCE changes it progressively toward the treble end. LOW LEVEL and HIGH LEVEL do the same for amplitude. They do not create an abrupt split into two independent keyboards. Their contributions are added to or subtracted from the existing settings. The ordinary pitch-related filter tracking remains a separate part of the voice-control system.</p>
+<p>Sources: service manual, PDF pages 16–17; owner's manual, PDF pages 13, 42, and 48.</p>
+
+<h2>9. One M voice board</h2>
+<p>Each M board receives an assigned key voltage, trigger information, channel programming controls, modulation inputs, touch contributions, and power. It produces one channel's contribution to one played note. The same basic circuit is repeated sixteen times. The M schematic identifies a main VCO, waveshaper, two filter ICs, two envelope ICs, six IG00151 VCA stages, supporting amplifier circuitry, gates, and calibration components.</p>
+<h3>Main oscillator: IG00153 VCO III</h3>
+<p>IG00153 is the voice's voltage-controlled oscillator. A key-voltage input determines frequency, while the external frequency-setting and adjustment network establishes range and calibration. The oscillator uses an external timing capacitor and produces a sawtooth-related output for the waveshaper. Pitch control, modulation, transposition, and assigned key voltage influence the oscillator through their connected control circuitry.</p>
+<p>The service IC description gives proportional key-voltage and frequency examples: 0.25 V corresponds to approximately 130.8 Hz, 0.5 V to 261.6 Hz, 1 V to 523.2 Hz, 2 V to 1046 Hz, and 4 V to 2093 Hz under the stated normal-transposition condition. These examples explain why the converter and oscillator must be understood as a connected system.</p>
+<h3>Transposition gates and oscillator calibration</h3>
+<p>The FEET selections reach transistor and FET gating networks on the voice circuitry. Switched resistor paths change the oscillator's frequency-setting conditions. Calibration trimmers establish offset and pitch accuracy at the specified notes and transposition settings. The service procedure checks multiple footages and keyboard extremes; a single overall tuning adjustment cannot correct every range error.</p>
+<h3>Waveshaper: IG00158</h3>
+<p>IG00158 receives the oscillator waveform and produces the wave shapes needed by the sound path. Its documented connections include sawtooth, pulse, triangular-wave, and sine-related paths. A slice-level input and a pulse-width-modulation input determine the pulse shape. The internal sine path is associated with triangular-wave shaping; the visible panel's sine control does not imply a separate, independently tuned sine oscillator.</p>
+<p>The square and saw switches enable their corresponding contributions. Both may be enabled together. The sine contribution uses its own level path after the filters. These outputs share their originating voice oscillator, so their frequency relationship is inherent in the circuit.</p>
+<h3>PW and PWM</h3>
+<p>PW supplies a steady pulse-width setting to the waveshaper. Its labeled range is 50% to 90%; the owner's explanation defines the larger percentage in terms of the off portion of the cycle, leaving a narrower on pulse. PWM supplies a changing voltage at the pulse-width control. PWM depth determines the excursion, and PWM SPEED sets the rate of the separate PWM oscillator. Neither control is the same as vibrato: width changes without requiring the fundamental pitch to change.</p>
+<p>Sources: service manual, PDF pages 42–44; owner's manual, PDF pages 19, 36, and 46–47.</p>
+
+<h2>10. Noise generation and its connections</h2>
+<p>The SUB board contains a transistor noise-generator section, amplification, and separate voltage-controlled level paths feeding the voice banks. Noise is generated electrically and amplified into a useful signal. Unlike a pitched oscillator, it does not follow the played key as a regular repeating waveform. The NOISE slider selects how much is introduced into the voice's pre-filter signal mixture.</p>
+<p>The shared generation and bank distribution matter. Noise arriving at several voices is not automatically equivalent to sixteen unrelated random generators. Each voice's filters and envelope still shape its own audible noise contribution. The same general noise facility also supplies the NOISE choice in the common suboscillator section, through the routes identified in the schematic.</p>
+<p>Sources: service manual, PDF pages 30–31 and 73; owner's manual, PDF pages 19–20 and 46.</p>
+
+<h2>11. High-pass filter: IG00156</h2>
+<p>The high-pass stage follows the selected saw, pulse, and noise mixture. It uses an IG00156 filter IC with external capacitors, resistors, control connections, and resonance feedback. The IC provides filter-related outputs and control inputs; the high-pass configuration selects the corresponding response. The service description shows a 12 dB-per-octave high-pass response.</p>
+<p>HPF determines the basic cutoff. Raising it progressively attenuates the fundamental and lower harmonics. RES H controls emphasis near the cutoff by changing the filter's resonance-control conditions. Key tracking, filter envelope, brilliance, touch response, and modulation contribute through the connected control-mixing network. Their control voltages influence cutoff; they are not additional audio signals mixed at the output.</p>
+<p>The output of this stage feeds the low-pass stage. This order matters when considering the actual circuit's gain, nonlinear behavior, and internal signal levels.</p>
+<p>Sources: service manual, PDF pages 40–43 and 73; owner's manual, PDF pages 20–21 and 46.</p>
+
+<h2>12. Low-pass filter: IG00156</h2>
+<p>A second IG00156 forms the low-pass stage, again with external frequency-setting capacitors, resistors, and feedback/control connections. Its response is documented as 12 dB per octave. LPF sets its cutoff; lowering that cutoff attenuates upper harmonics and eventually the fundamental. RES L adjusts the resonance associated with this stage independently of RES H.</p>
+<p>Because the high-pass and low-pass sections are in series, their combined result can emphasize a selected band. A low high-pass cutoff and a high low-pass cutoff permit a wide spectrum; bringing their cutoffs toward one another narrows the useful passband. Real filters have slopes rather than infinitely sharp boundaries, so a schematic explanation should not imply mathematically perfect frequency exclusion.</p>
+<p>The low-pass output enters the filtered-signal VCA path. The sine branch joins downstream through its own gain stage, which is why moving the filters does not directly remove the separately mixed sine contribution.</p>
+<p>Sources: service manual, PDF pages 42–43 and 73; owner's manual, PDF pages 20–25 and 46.</p>
+
+<h2>13. Filter envelope: IG00152</h2>
+<p>The filter envelope uses IG00152 with supporting buffer/gain circuitry and external timing and level controls. A key event activates its gate inputs. Attack, decay, and release settings establish the timing behavior, while IL and AL establish the initial and attack levels relative to the sustained filter reference. Its output is routed into cutoff control for both filters.</p>
+<p>At note onset, IL places the envelope below the steady reference. During attack, the control rises toward the level determined by AL. During decay, it returns to the steady reference. On release, it moves back toward the IL condition. There is no separate filter-envelope sustain slider: the steady reference is the resting programmed cutoff condition.</p>
+<p>The service chip drawing shows curved transitions and control inputs for attack, decay, release, level, and timing. The nominal voice-envelope ranges are approximately 1 ms to 1 s for attack and 10 ms to 10 s for decay and release. Those ranges do not specify the exact value at every slider position. If IL and AL are both zero, this envelope introduces no cutoff excursion.</p>
+<p>Sources: service manual, PDF pages 42–43; owner's manual, PDF pages 24–26, 37–38, and 53.</p>
+
+<h2>14. Sine level, filtered level, and the voice VCAs</h2>
+<p>The M board uses IG00151 voltage-controlled amplifier stages to control audio and control-signal amplitudes. In the audio path, one stage handles the sine contribution and another handles the filtered contribution. The sine is therefore mixed electrically after filtering rather than fed through the high-pass and low-pass stages.</p>
+<p>VCF LEVEL determines the filtered contribution. SINE WAVE determines the unfiltered sine contribution. Following these paths, further VCA stages provide the suboscillator-related amplitude modulation and the final envelope-controlled amplitude. A buffer then supplies the voice output to the bank's output connection. The supporting resistor networks set gains and summing relationships, and capacitors provide coupling and response shaping.</p>
+<p>The panel's VCA LEVEL sets the overall programmed voice level. It is distinct from VCF LEVEL, SINE WAVE level, the amplitude envelope's sustain level, the channel MIX control, and master VOLUME. These controls influence different places in the circuit and cannot all be represented accurately as the same knob with a different label.</p>
+<p>Sources: service manual, PDF pages 42 and 73; owner's manual, PDF pages 22–25 and 39.</p>
+
+<h2>15. Amplitude envelope: IG00159</h2>
+<p>IG00159 generates the amplitude envelope. It receives key gate/trigger information and the attack, decay, sustain, and release control conditions. Its changing voltage controls the final envelope-related VCA stage. External components and the connected control paths establish timing, scaling, and the maximum level.</p>
+<p>Attack raises the level toward its peak. Decay lowers it toward the sustain level. Sustain is the level maintained while the key remains active. Release determines the fall after release under the applicable control conditions. The global performance SUSTAIN circuit also influences how notes die away, so the complete release behavior is determined by the connected system, not just one isolated ADSR slider.</p>
+<p>The sine and filtered branches both remain subject to amplitude shaping. Bypassing the VCF does not leave the sine continuously sounding regardless of key state. Initial level, after level, keyboard level, and modulation are additional control influences associated with the voice's gain circuitry.</p>
+<p>Sources: service manual, PDF pages 42–43; owner's manual, PDF pages 22–23, 39, and 47.</p>
+
+<h2>16. R51 and R52: control mixing and distribution</h2>
+<p>R51 and R52 connect shared controls to the individual voice-control inputs. Their repeated resistor networks combine contributions for cutoff, resonance, pitch/modulation, and amplitude-related control. Wiring identifies per-assignment lines and corresponding connections into both banks. The purpose is to deliver the appropriate combination to each voice without requiring every performance control to contain sixteen separate mechanical sliders.</p>
+<p>For filter cutoff, the system combines the channel's selected setting with key tracking, envelope-related conditions, global brilliance, keyboard brilliance, touch contributions, and modulation as connected. For resonance, channel resonance and overall resonance reach the appropriate high-pass and low-pass paths. Amplitude and oscillator-control contributions have their own networks. Resistor ratios and connected source impedances affect scaling, so “adding controls” describes the function without specifying an exact numerical software formula.</p>
+<p>Sources: service manual, PDF pages 40–41 and 73–74.</p>
+
+<h2>17. BA, the tone selectors, and the preset matrices</h2>
+<h3>Selector switches and IG00157 selection memory</h3>
+<p>The two tone-selector rows select one sound per bank. The selector circuit uses IG00157 devices with associated switching and diode circuitry to retain the selected state and control the corresponding selection lines. This selection memory should not be confused with recording an audio waveform or storing a patch as a modern digital parameter file.</p>
+<p>The BA circuitry buffers and conditions the selected control paths. Its schematic includes transistor/FET switching and amplifier stages. The selection signals continue into the T51–T54 tone matrices, which determine the set of control conditions applied to the chosen bank.</p>
+<h3>T51, T52, T53, and T54</h3>
+<p>These boards contain networks of fixed resistors and steering diodes. Selecting a preset activates the relevant network, which provides the electrical equivalents of many panel-control settings at once. The matrices connect to waveform selection, pulse width, filtering, envelopes, levels, and touch-response controls through their shared parameter lines. They are analog preset networks rather than samples or digital waveform tables.</p>
+<p>T51/T52 serve the first channel's tone-control system, while T53/T54 serve the second channel's system. The service drawings show the selection and parameter connections between paired boards. Main-panel and memory-panel control paths join this system, allowing the selected source of settings to control the same underlying voice electronics.</p>
+<h3>The available selections</h3>
+<p>Channel I provides String 1, String 3, Brass 1, Flute, Electric Piano, Clavichord 1, Harpsichord 1, Organ 1, Guitar 1, Funky 1, Funky 3, Memory 1, Memory 3, and Panel. Channel II provides String 2, String 4, Brass 2, Brass 3, Bass, Clavichord 2, Harpsichord 2, Organ 2, Guitar 2, Funky 2, Funky 4, Memory 2, Memory 4, and Panel. The owner states that simultaneous button presses in a row resolve to the leftmost selection.</p>
+<p>Sources: service manual, PDF pages 28–39 and 66; owner's manual, PDF pages 11 and 32–35.</p>
+
+<h2>18. Main programming panels and four memory panels</h2>
+<p>Each main programming panel contains potentiometers and waveform switches. Their wipers and contacts connect to the tone-control system. When PANEL is selected, those physical settings provide the control conditions for the corresponding bank. Changing one panel setting therefore changes the relevant control across that bank's eight voice circuits.</p>
+<p>The four memories are additional miniature sets of physical potentiometers and switches. They retain a patch because their controls remain in position. There is no electronic operation that copies the main panel into them: the player transfers settings manually and adjusts them by ear. Memory 1 and Memory 3 belong to channel I; Memory 2 and Memory 4 belong to channel II.</p>
+<p>Each panel provides PWM speed, PWM depth, pulse width, pulse and saw selection, noise level, high-pass cutoff and resonance, low-pass cutoff and resonance, filter-envelope IL/AL/A/D/R, filtered level, sine level, amplitude A/D/S/R, final level, initial brilliance and level, and after brilliance and level. Each is a separate physical control connection, even where several ultimately influence the same filter or amplifier.</p>
+<p>Sources: service manual, PDF pages 63–64; owner's manual, PDF pages 19–27 and 40.</p>
+
+<h2>19. SUB board: the common suboscillator</h2>
+<p>The common suboscillator uses an IG00150 VCO II with external timing and control components. Amplifier and waveshaping stages produce the selectable sine, descending saw, ascending saw, and square modulation functions. A function switch also selects noise or an external signal. The selected signal passes through the connected buffer and amount-control paths toward VCO, VCF, and VCA modulation destinations.</p>
+<p>SPEED changes the repeating oscillator's rate, nominally about 0.7–60 Hz. It does not change the rate of an external signal or impose a periodic rate on noise. The VCO amount influences pitch, the VCF amount influences filter cutoff, and the VCA amount influences amplitude. The pressure-sensitive SPEED path connects into the oscillator's control system, while pressure-sensitive VCO/VCF paths determine assigned modulation effects.</p>
+<p>The SUB circuit's IG00151 VCAs, amplifier stages, resistor networks, and switching determine signal depth, routing, and control scaling. The common modulation waveform is distinct from the separately provided PWM and ring-modulator oscillators.</p>
+<p>Sources: service manual, PDF pages 30–31 and 73; owner's manual, PDF pages 13–14, 41, and 53.</p>
+
+<h2>20. PWM oscillators</h2>
+<p>The SUB circuitry also provides the PWM oscillator paths associated with the channel programming system. The corresponding oscillator rate is controlled by the selected channel's PWM SPEED setting, and its amplitude is controlled by PWM depth. The resulting changing voltage is distributed to the waveshapers' pulse-width control inputs for that bank.</p>
+<p>This arrangement moves the pulse-width control electrically around the static PW setting. It does not require a recording of changing pulse waves, and it does not imply that every new note restarts a separate PWM oscillator at phase zero. The original sharing and phase relationships follow the actual oscillator and distribution wiring.</p>
+<p>Sources: service manual, PDF pages 30–31 and 73; owner's manual, PDF pages 19 and 47.</p>
+
+<h2>21. External modulation input</h2>
+<p>The rear EXTERNAL IN jack connects to an input amplifier on the SUB circuitry. EXTERNAL LEVEL sets the signal level presented to the suboscillator's external-function path. Selecting EXT routes that conditioned signal to the modulation controls; it can then influence pitch, filter cutoff, or amplitude according to the VCO, VCF, and VCA amount settings.</p>
+<p>This connection is not a conventional audio input that is directly passed through each voice's filters. The external waveform acts as a control/modulation source. The jack, its level potentiometer, coupling and amplifier components, and the function switch together form the input path.</p>
+<p>Sources: service manual, PDF pages 30–31 and 68; owner's manual, PDF pages 8, 13, 41, and 51.</p>
+
+<h2>22. Coarse pitch, fine pitch, feet, and channel-II detune</h2>
+<p>Coarse and fine pitch controls vary the tuning reference used by the pitch system. The coarse control provides a much larger range than fine. The key converter and oscillator-control circuits use the resulting reference conditions to tune the instrument as a whole. Channel-II DETUNE changes the second bank relative to the first without transposing channel I.</p>
+<p>The two FEET selectors are discrete switches. Relative to 8 feet, 16 feet is an octave down, 5⅓ feet is a fifth up, 4 feet is an octave up, 2⅔ feet is an octave and a fifth up, and 2 feet is two octaves up. Their wiring selects the appropriate transposition conditions for each bank's oscillator circuitry. These controls operate on pitch generation, not on the audio signal after the oscillator.</p>
+<p>Sources: service manual, PDF pages 30–31, 42–44, and 65; owner's manual, PDF pages 12, 18, and 48.</p>
+
+<h2>23. Overall brilliance and resonance</h2>
+<p>Overall BRILLIANCE changes the cutoff-control contribution delivered to both high-pass and low-pass filters in both banks. Moving toward greater brilliance raises their cutoff conditions together. Its audible effect therefore depends on both filters, the waveform spectrum, and the selected preset or programmed settings.</p>
+<p>Overall RESONANCE changes the resonance-control contribution to both filter types. The two channel-programmed resonance settings remain independent starting conditions. The panel potentiometers connect into the control mixing/distribution circuitry rather than inserting a separate equalizer after the final stereo outputs.</p>
+<p>Sources: service manual, PDF pages 40–41 and 65; owner's manual, PDF pages 12 and 42.</p>
+
+<h2>24. Ribbon controller</h2>
+<p>The ribbon contains a resistive strip and a conductive contact element beneath its soft covering. Pressure brings them into contact. The circuit uses the first contact position as a reference, then responds to a change of position relative to that reference. Buffers and comparison/control circuitry turn that difference into the pitch-control contribution for the oscillator system.</p>
+<p>Moving to the right of the reference raises pitch; moving to the left lowers it. The upward travel is approximately one octave over the full ribbon, while downward travel extends much farther and can reach subaudio pitch. A fixed absolute pitch value at each ribbon position would not reproduce this relative-reference operation.</p>
+<p>The sustain-mode wiring affects whether ribbon movement continues to influence released notes. In Sustain I, its pitch effect applies while a key is held. In Sustain II, it can affect the decaying sound after key release. Exact return and release-order behavior requires following the storage and gating conditions, not just the physical resistive strip.</p>
+<p>Sources: owner's manual, PDF pages 18 and 48; service manual, overall control wiring on PDF pages 73–74.</p>
+
+<h2>25. Performance sustain</h2>
+<p>The global SUSTAIN slider, mode switch, foot-switch assignment, and related gate/control wiring govern note die-away after release. Their connections involve the SUB control circuitry and the key/hold system. They operate in addition to the channel amplitude-envelope release settings. The available performance-sustain time reaches approximately ten seconds.</p>
+<p>Sustain I allows notes to decay independently. Sustain II allows the most recent note or chord to carry the sustain; playing the next note or chord ends the earlier sustain. These mode numbers do not refer to sound channels I and II. The selected mode also changes the released-note behavior of the ribbon and glissando paths.</p>
+<p>The foot-switch assigner determines whether the effect follows the foot switch or remains active according to the slider setting. With no foot switch inserted, the jack's normal contact completes the circuit as though the switch were pressed. This is an electrical jack-contact behavior, not a software assumption that an absent pedal means “off.”</p>
+<p>Sources: service manual, PDF pages 8, 30, 67–68, and 73–74; owner's manual, PDF pages 15, 43, and 49.</p>
+
+<h2>26. Portamento and glissando</h2>
+<p>The P/G slider changes the timing of the pitch transition system associated with the key-voltage converter. Glissando moves in note steps corresponding to semitones. The owner's circuit explanation describes portamento as smoothing those steps through an integrating element, yielding a continuous pitch movement. Thus the converter, timing circuit, smoothing, and voice assignment are connected parts of one behavior.</p>
+<p>The mode switch selects portamento or glissando, while a separate foot-switch assigner controls when the selected effect is active. Releasing an assigned pedal removes the gradual transition and takes the pitch to its current target. At the longest setting, the full keyboard transition takes approximately ten seconds. Sustain II permits glissando to continue during the released note's die-away; Sustain I does not provide the same released-note continuation.</p>
+<p>Sources: service manual, PDF pages 5–7 and 67; owner's manual, PDF pages 16, 43, and 48.</p>
+
+<h2>27. MIX and bank summing</h2>
+<p>The eight voice outputs in each bank connect into the bank output network. The dual-section MIX control sets the relative channel-I and channel-II contributions to the common audio path. Centering it permits both timbres; moving to an end selects the corresponding bank contribution. It does not add voices or convert the instrument into sixteen independently assigned notes.</p>
+<p>The mixed signal enters the PRA processing circuitry. Supporting resistors and amplifier stages provide the required summing, gain, and buffering. The exact gain-versus-position law follows the potentiometer and its surrounding circuit, so a particular digital crossfade law should not be assumed from the label alone.</p>
+<p>Sources: service manual, PDF pages 54–55, 65, and 73–74; owner's manual, PDF pages 11 and 35.</p>
+
+<h2>28. PRA: ring modulation and common audio processing</h2>
+<h3>The ring-modulator carrier</h3>
+<p>The ring modulator has a separate IG00150 oscillator that supplies its carrier. SPEED controls the carrier's base rate. A connected envelope/control path varies that rate over time. The carrier is not the channel-II oscillator and is not tied to the pitch of each played key.</p>
+<h3>The balanced modulation stage</h3>
+<p>The PRA circuit identifies an MA796 balanced-modulator device, supporting amplifier stages, coupling components, and gain/balance adjustments. The mixed musical signal and carrier enter the modulation circuit through their respective conditioned paths. Their interaction produces components at sum and difference frequencies. At low carrier rates this resembles pulsing; at higher rates it produces inharmonic or metallic spectra.</p>
+<p>MODULATION controls the audible amount of the effect through the connected carrier/modulation path. A practical analog balanced modulator has gain, balance, feedthrough, and signal-level behavior in addition to the ideal multiplication description. Those properties come from the circuit and calibration, not merely from the word “ring.”</p>
+<h3>Ring frequency envelope</h3>
+<p>An IG00159 envelope device and IG00151 VCA circuitry provide the changing control for carrier frequency. ATTACK and DECAY determine its rise and fall. DEPTH determines the amount of carrier-frequency excursion. DEPTH is therefore different from MODULATION: one changes the frequency envelope and the other the effect amount.</p>
+<p>The shared keyboard trigger reaches this circuit from the key-assignment system. The owner's instructions state that adding notes while any key is still held does not restart the ring envelope; releasing all keys and then playing again does. Consequently, the original has common ring processing with a shared trigger condition, rather than sixteen separately triggered ring modulators.</p>
+<p>Sources: service manual, PDF pages 54–55; owner's manual, PDF pages 17–18 and 48.</p>
+
+<h2>29. Foot controller: expression and wah</h2>
+<p>The continuous foot controller uses an optical arrangement: a light source, an aperture moved by the pedal, and a photosensitive element. Rocking the pedal changes the amount of light reaching the sensor and therefore the electrical control condition. Its three-conductor connection is different from the simple two-conductor foot switch.</p>
+<p>In EXP mode, the controller changes the expression-related audio level path. In EXP/WAH mode, the associated switching also changes filter-control conditions and resonance to produce wah while changing expression. The PRA circuitry and connected control paths receive these conditions. Optical sensing and the associated conditioning determine the response; the original pedal is not simply an ordinary rotary potentiometer mounted under a treadle.</p>
+<p>The separate binary foot switch connects to sustain and portamento/glissando assignment circuitry. Its function is to close or open a control connection. It does not provide a continuously variable expression value.</p>
+<p>Sources: service manual, PDF pages 54–55 and 67–68; owner's manual, PDF pages 18, 43, and 49.</p>
+
+<h2>30. OE1: tremolo/chorus modulation and routing</h2>
+<p>OE1 provides the modulation and control relationships for the stereo tremolo/chorus effect. Its schematic includes IG00150 oscillator devices, amplifier circuitry, FETs, diodes, and switching connections. ON/OFF enables the selected effect, while CHORUS and TREMOLO choose different operating conditions. SPEED sets the modulation rate, and DEPTH controls the extent of the effect through the connected modulation and gain paths.</p>
+<p>The effect changes both amplitude and phase/time relationships. The left and right channels vary in a coordinated way to suggest rotation. Chorus operates in a slower range, described by the owner's manual as approximately 0.5–5 Hz, while tremolo operates at approximately 5–20 Hz. These are nominal ranges, not a complete calibration curve.</p>
+<p>Sources: service manual, PDF pages 56–57; owner's manual, PDF pages 17, 43, and 49.</p>
+
+<h2>31. OE2: analog delay, clock, and stereo gain stages</h2>
+<p>OE2 contains an MN3001 analog delay device, a BA617 clock-related device, TC4049 logic in the clocking system, HA1452 amplifier stages, and IG00151 VCAs. The delay transfers an analog signal through a clocked charge-storage process. Changing the clock changes the time taken for the signal to move through the delay. The audio is neither stored as a WAV file nor converted into a conventional digital sample stream by this circuit.</p>
+<p>Filtering around the delay controls the spectrum entering and leaving the clocked path and reduces unwanted clock-related content. The delayed and undelayed contributions are combined through the effect routing and stereo gain circuits. Modulating delay changes phase and instantaneous pitch relationships, while modulation of the VCAs changes amplitude. Together these produce the rotary-style behavior described in the owner's manual.</p>
+<p>The complete sound depends on the clock range, filtering, delay gain, dry/delayed mixture, modulation waveforms, and stereo relationships. The presence of an analog delay does not mean an arbitrary modern chorus algorithm is electrically equivalent. The effect remains audible when the stereo channels are combined into the GENERAL output.</p>
+<p>Sources: service manual, PDF pages 58–59; owner's manual, PDF pages 17 and 49.</p>
+
+<h2>32. Master volume, output jacks, and headphones</h2>
+<p>Master VOLUME is a dual-section audio control connected to the output-related circuitry. It sets the overall listening level after the individual programmed voice levels and channel balance have established the sound. Expression provides an additional performance-level influence through its own circuit path.</p>
+<p>The rear LEFT and RIGHT outputs carry the stereo effect's two sides. GENERAL provides a mono combination. Without the stereo modulation effect, LEFT and RIGHT normally carry equivalent musical content. The HIGH/LOW switch changes the nominal output level by 20 dB. The owner's specification gives approximately 0.775 V RMS in HIGH and 77.5 mV RMS in LOW under its nominal conditions.</p>
+<p>The output connections are unbalanced, with a stated nominal source impedance of 600 ohms. Headphones use a separate stereo jack and suitable output-conditioning connections; the owner's specification gives a nominal headphone level of approximately 250 mV RMS. These are electrical operating levels, not digital full-scale values.</p>
+<p>Sources: service manual, PDF pages 54–55 and 68; owner's manual, PDF pages 8 and 53.</p>
+
+<h2>33. SVU and the power supply</h2>
+<p>The supply begins with mains switching, protection, and transformer circuitry. The transformer supplies isolated secondary AC to rectifier sections. Rectifiers turn the alternating voltage into pulsating DC. Large electrolytic capacitors smooth it, and transistor regulator circuits with amplifier/reference and feedback components stabilize the operating rails.</p>
+<p>The SVU drawing identifies +15 V and −15 V analog rails, +8.5 V and −6.5 V keyboard/logic-related rails, a +10.6 V supply/reference connection, ground connections, and the associated sense connections marked +15S and −15S. Separate supply paths support circuits with different voltage and noise requirements. The service manual specifically identifies the sense connections as part of correct regulator operation.</p>
+<p>Small capacitors distributed around the boards bypass the supply locally. Ground and return wiring provide the reference for audio and control voltages. Supply ripple, grounding errors, or reference-voltage drift can affect several voices at once because those circuits share their power and reference system.</p>
+<p>The power supply is part of the physical explanation, but no power-supply repair or adjustment procedure is required to understand or implement a software instrument.</p>
+<p>Sources: service manual, PDF pages 60–62 and overall drawings; owner's manual, PDF pages 4, 10, and 53.</p>
+
+<h2>34. Wiring, connectors, and panel assemblies</h2>
+<p>The service manual identifies board-to-board wiring by rack, board, terminal label, wire color, and conductor information. A label such as E denotes the circuit's earth/reference connection in the relevant drawing; named signal terminals distinguish pitch, gate, audio, and control lines. Shielded and coaxial connections are identified separately from ordinary hookup wire.</p>
+<p>Panel 1 contains the two main programming panels. The memory-bank assembly carries the miniature programming controls. Panel 2 contains the principal tone selectors and many performance controls. Panel 3 contains sustain, portamento/glissando, stereo-effect, and pedal-selection controls. Panel 5 includes rear connection assemblies identified in the service drawings as EJ, EXP, and PFS. These physical groupings are connected by wiring to the functional boards already described.</p>
+<p>Switch-contact notation describes electrical contacts, not merely the visible rocker position. The manual distinguishes the moving contact and its make/break connections. Reading that wiring is essential when explaining why an effect may remain active with a foot switch unplugged or when a panel assigner is bypassed.</p>
+<p>Sources: service manual, PDF pages 4 and 63–68.</p>
+
+<h2>35. What creates the instrument's variation between notes</h2>
+<p>Each assigned note passes through one of eight physical voice circuits per bank. Resistor tolerances, capacitor tolerances, oscillator calibration, filter response, VCA offsets, and envelope behavior can differ slightly between those circuits. Successive notes can therefore differ even when their nominal settings match. These differences are properties of repeated analog electronics, not extra samples selected at random.</p>
+<p>The owner's manual explicitly connects sequential voice assignment with this variation. The service manual's individual adjustments show why calibration matters. Neither manual supplies a complete measured distribution of every parameter across a population of instruments. Any later model of voice variation should distinguish measurements from chosen approximations.</p>
+<p>Sources: owner's manual, PDF page 47; service manual, PDF pages 42–52.</p>
+
+<h2>36. Where the manuals stop</h2>
+<p>The manuals establish the architecture, components, connections, operating controls, and many nominal ranges. They do not provide a full transistor-level description of every Yamaha proprietary IC, a complete set of measured nonlinear transfer curves, or a numerical mapping for every slider position. A functionally correct explanation should preserve these limits.</p>
+<p>Details that still require further derivation or measurement include the exact oscillator and waveshaper spectra, filter saturation and resonance limits, complete envelope and touch-response curves, pressure combination in shared controls, all voice-assignment edge cases, sustain/release interactions, ribbon return behavior, the stereo delay's full clock/filter response, and precise preset control voltages. The schematic contains evidence for many of these, but a component value or behavior should only be stated as exact after its connected circuit has been checked.</p>
+<p>A mathematical software model can reproduce these signal relationships without recorded waveform files. The electronic explanation remains the reference: preserve the two complete voice layers, the shared and individual control paths, the sine bypass, the separate filter types, the touch behavior, and the common effects before deciding how to express them as equations.</p>
+
+<h2>37. Source map</h2>
+<p>Yamaha CS-80 Owners Manual.pdf: general controls on PDF pages 10–18; programmable panels and memories on pages 19–27; programming examples and preset equivalents on pages 28–34; technical control descriptions on pages 35–43; circuit-operation explanations on pages 45–49; specifications on page 53.</p>
+<p>CS-80-Service-Manual.pdf: KAS on PDF pages 5–7; SH on pages 8–9; TKC on pages 10–11; TSB1 and TSB2 on pages 12–15; KBC on pages 16–17; TWS on pages 18–19; TRG1–TRG5 on pages 20–27; BA on pages 28–29; SUB on pages 30–31; tone matrices on pages 32–39; R51/R52 on pages 40–41; M voice circuitry and IC descriptions on pages 42–43; pitch adjustment on page 44; voice-board wiring on pages 45–53; PRA on pages 54–55; OE1/OE2 on pages 56–59; power supply on pages 60–62; panel and connector circuits on pages 63–68; supplementary system drawings on pages 69–74.</p>
+</main>
+</body>
+</html>

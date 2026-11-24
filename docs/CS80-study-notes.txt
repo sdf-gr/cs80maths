@@ -1,0 +1,206 @@
+CS-80 study notes -- 2026-11-23
+Purpose: retain the manual-based understanding for questions before implementation.
+Status: no Audio Unit or synthesis implementation started.
+Sources: Yamaha CS-80 Owners Manual.pdf (56 PDF pages); CS-80-Service-Manual.pdf
+(74 PDF pages, serial #1001 onward). Page references below are PDF page numbers,
+not printed folio numbers. Searchable OCR is in tmp/manuals/{owners,service}.txt.
+OCR is imperfect, especially rotated schematics and patch charts; use original
+page images for component values, signs, waveforms, and slider positions.
+
+1. INSTRUMENT ARCHITECTURE
+Owner pp35,45-49; service pp7,42-43,73-74.
+61 keys over five octaves; eight simultaneous key assignments. Each assignment
+operates two independent synthesizer channels, I and II, so there are sixteen
+main VCOs, sixteen HPF/LPF pairs, sixteen filter envelopes and sixteen amplitude
+envelopes. Mixing the two channels does not change the eight-note capacity.
+Each note has two complete timbres, rather than just two oscillators into one
+shared filter/envelope. MIX I-II blends the two banks before the common output
+processing. The underlying banks are M11-M18 and M21-M28.
+The owner manual says repeated strikes of a single key cycle through the eight
+voice circuits, and that a ninth held key does not replace one of eight held keys.
+Do not substitute a typical modern oldest-note-stealing allocator without checking
+all edge cases against the KAS/TKC circuitry.
+Main oscillators are voltage-controlled analog circuits, although the keyboard
+coder and assigner are digital. YM26600 performs coding/assignment; YM26700
+converts time-shared note/octave data to analog key voltages. The key-voltage
+ladder and oscillator frequency relationship are not simply a literal 1V/oct
+hardware interface: octave voltages double (0.25,0.5,1,2,4V in the IC examples).
+Musical pitch can still be represented logarithmically in a future DSP model.
+
+2. AUDIO PATH AND SOURCES
+Owner pp19-25,45-47; service pp30-31,42-43,73.
+A main sawtooth oscillator and waveshaper supply the selectable saw and pulse
+waves. The waveshaper also derives the sine path. Square and saw switches are
+independent; white noise has its own level. These sources enter HPF, then LPF.
+The filtered path is adjusted by VCF LEVEL. SINE WAVE level introduces the
+oscillator's sine after the filters. The resulting sound is subject to amplitude
+shaping, modulation and level control. Sine bypasses VCF, not the VCA envelope.
+The M schematic has separate IG00151 VCA stages for the sine/tone paths,
+suboscillator modulation and envelope, so a single generic gain formula requires
+careful equivalence checking. IG00153 is the main VCO III, IG00158 the waveshaper,
+IG00156 the filter IC, IG00152 filter EG and IG00159 amplitude EG.
+The overall schematic shows noise generation with separate bank level paths,
+and bank PWM oscillator/control paths. Do not assume a new independent noise
+source and independently reset PWM LFO for every key.
+Mathematical generation is the user's requirement: no WAV sample playback.
+Saw/pulse discontinuities require bandlimiting in a sampled implementation.
+A perfect mathematical sine is a starting point, not proof of equivalence to the
+original analog waveshaper and its harmonic residue. Oscillators, filters and
+control response must be modeled together.
+
+3. PER-CHANNEL PROGRAMMING
+Owner pp19-27,36-40; service pp42-43,63-64.
+VCO: PWM SPEED, PWM depth, PW, square on/off, saw on/off, noise level.
+PW covers 50%-90% as labeled. The owner describes width as OFF-time duty,
+so 90% corresponds to narrow ON pulses. PWM depth zero disables width motion;
+PWM SPEED only affects pulse width, not pitch and not the common SUB OSC.
+VCF: HPF cutoff and RES H; LPF cutoff and RES L; IL, AL, A, D, R envelope.
+Both filters track note pitch. Their independent cutoffs/resonances can make a
+bandpass; neither should be replaced with a single conventional lowpass.
+The service IG00156 diagrams label low/high responses +/-12dB/octave.
+The filter envelope starts below its steady reference by IL, rises to AL above
+the reference over attack, decays to the reference, and returns to IL on release.
+IL range is marked 0 to -5 and AL 0 to +5: these are panel values, not a claim
+that they represent octaves. The sustained reference comes from cutoff settings.
+With IL=AL=0 there is no filter-envelope motion; with AL=0 decay has no excursion.
+The same envelope shifts BOTH HPF and LPF cutoffs, subject to their limits.
+VCA: filtered-path level, sine level, ADSR, final level. VCA Sustain is a held
+level, unlike the global SUSTAIN performance section, which governs die-away.
+Four channel touch sliders: INITIAL BRILLIANCE, INITIAL LEVEL, AFTER BRILLIANCE,
+AFTER LEVEL. Zero touch amount means that effect contributes nothing; it should
+not force all notes to be velocity-scaled anyway.
+
+4. INITIAL AND AFTER TOUCH
+Owner pp14,27,40,42,47-48; service TSB/TRG sections pp10-27.
+Initial touch measures key travel time between two contacts; shorter time gives
+stronger initial control. After touch is a pressure sensor beneath each key.
+It is polyphonic pressure: a player can change one note inside a held chord.
+Initial brightness raises HPF/LPF cutoff; initial level raises amplitude. The
+owner's deeper explanation describes the initial signal as a finite pulse with
+decay, not merely an immutable velocity multiplier for the whole held note.
+Global INITIAL PITCHBEND starts below target pitch and recovers upward; depth
+increases with strike velocity and lever amount. It is not a pitch-wheel setting.
+Global AFTER SPEED, VCO and VCF use the selected common suboscillator function.
+Pressure can increase modulation rate, pitch modulation depth and filter
+modulation depth. There is no separate global AFTER VCA lever; channel AFTER
+LEVEL provides pressure-dependent loudness.
+Rate sensitivity to individual keys requires tracing the shared SPEED control
+combination; do not invent independent per-voice LFO rates and call them verified.
+
+5. GLOBAL PITCH, TIMBRE AND KEYBOARD CONTROLS
+Owner pp12-14,18,41-43,48,53.
+FEET selectors are independent for I/II: 16,8,5-1/3,4,2-2/3,2 feet. Relative to
+8 feet these give -12,0,+7,+12,+19,+24 semitones. They are discrete selections.
+DETUNE CH II affects only bank II; common coarse/fine pitch affects both banks.
+The specifications give coarse approx -500 to +700 cents; the fine range must
+be checked visually because OCR mangles the +/- signs (approximately +/-50 cents).
+Channel II detune is described as approximately +/- one semitone; verify endpoints.
+BRILLIANCE adds/subtracts cutoff control for both filters. RESONANCE adds to both
+resonance controls. They modify presets as well as panel/memory sounds.
+LOW/HIGH keyboard brilliance and level controls smoothly weight the lower/upper
+registers around the central region; they are not a split keyboard and do not
+replace normal filter keyboard tracking. Exact curves need extraction.
+
+6. SUB OSCILLATOR AND EXTERNAL INPUT
+Owner pp13-14,41,46-47,53; service SUB pp30-31 and overall.
+Common modulation source choices: sine, descending saw, ascending saw, square,
+white noise, external signal. SPEED covers about 0.7-60Hz. It does not change
+noise or external-signal rate. VCO, VCF, VCA levers set modulation amounts.
+VCO gives vibrato/FM; VCF gives moving timbre; VCA gives tremolo/AM.
+External input is a modulation input selected through this section, not a normal
+audio feed through the instrument's voice filters. External level sets its gain.
+PWM, ring-modulator oscillator and tremolo/chorus modulation are separate from
+this common suboscillator.
+
+7. RING MODULATOR
+Owner pp17-18,41,48; service PRA pp54-55.
+Shared processing for the mixed channels. Sine carrier produces sum/difference
+components; the original carrier path and balanced modulation include analog
+circuit behavior. DEPTH controls frequency-envelope excursion, MODULATION controls
+amount of modulation, SPEED sets base carrier frequency. ATTACK and DECAY govern
+rise/fall of carrier rate. These controls must not be confused with each other
+or with the voice envelopes.
+The envelope retriggers after all keys have been released and a new note/chord
+is played; additional keys while another is held do not restart it. Thus it is
+not one ring modulator/envelope per voice. Exact range/control law and trigger
+release details require further tracing; the owner's attack prose is imprecise,
+so rely on diagrams and circuit when deriving equations.
+
+8. PERFORMANCE SUSTAIN AND PORTAMENTO/GLISSANDO
+Owner pp15-16,43,48-49; service KAS/SH/TWS/SUB circuits.
+Global SUSTAIN sets note die-away, up to approximately 10s; it is not an infinite
+MIDI-style damper latch. Sustain I lets released notes decay independently.
+Sustain II allows the most recent released note/chord to decay and a later played
+note/chord ends previous sustain. These mode numbers have no connection to the
+two sound channels. Interaction with each channel's release requires analysis.
+One foot switch can enable sustain and/or P/G through separate assigners.
+Assigner OFF bypasses pedal and leaves the corresponding effect active at its
+slider amount; assigner ON makes it depend on the switch. With switch unplugged,
+the hardware jack acts closed: assigned effects are active. Releasing the pedal
+ends performance sustain; with P/G it jumps immediately to the target pitch.
+Portamento is continuous; glissando is quantized in semitones. At maximum setting,
+full keyboard travel is about 10s (about 2s/octave). The owner's circuit explanation
+says portamento smooths the glissando steps. This is not enough to assume a
+modern arbitrary constant-time glide implementation or allocation policy.
+Glissando stops on key release in Sustain I and can continue through die-away
+in Sustain II.
+
+9. RIBBON
+Owner pp18,48.
+First touch establishes a relative reference, independent of where contact begins.
+Sliding or adding a second touch relative to the held reference changes pitch
+for the instrument. Full travel upward is approximately one octave; downward
+travel is far greater and can bring the highest key into subaudio. A symmetric
++/-12-semitone MIDI wheel is therefore not equivalent.
+Sustain I: ribbon affects pitch while a key is held. Sustain II: it also affects
+the sustained tail. Release-order/held-reference behavior needs careful testing.
+
+10. OUTPUT EFFECT AND PEDALS
+Owner pp8,17-18,43,49; service PRA/OE1/OE2 pp54-59.
+Tremolo/chorus has enable, chorus select, tremolo select, speed and depth.
+It combines alternating stereo amplitude with modulated analog delay and dry
+signal to simulate rotation. It is not just the SUB VCA modulation duplicated.
+Chorus selects slow modulation (approximately 0.5-5Hz), tremolo faster (5-20Hz).
+Effect changes are audible in GENERAL mono too; output level drops somewhat
+when engaged. OE2 includes MN3001 analog delay; actual clock/delay/filter and
+stereo mixing relationships need derived DSP equivalents.
+Foot controller EXP controls output expression; EXP/WAH changes expression plus
+HPF/LPF cutoff and resonance. The foot controller is separate from the binary
+foot switch used for sustain/P/G.
+LEFT/RIGHT normally match without the stereo effect; GENERAL is their mono mix.
+Output HIGH/LOW changes nominal gain by 20dB. Avoid confusing electrical output
+voltages with digital plugin peak levels.
+
+11. PRESETS AND MEMORY
+Owner pp11,27,32-35,40,48-49; service pp2,32-39,63-66,73.
+11 fixed presets per channel, two physical memory panels per channel and one
+main programming panel per channel: 14 selections per bank, 28 basic selections.
+Channel I: String1,String3,Brass1,Flute,ElectricPiano,Clavichord1,Harpsichord1,
+Organ1,Guitar1,Funky1,Funky3,Memory1,Memory3,Panel.
+Channel II: String2,String4,Brass2,Brass3,Bass,Clavichord2,Harpsichord2,Organ2,
+Guitar2,Funky2,Funky4,Memory2,Memory4,Panel.
+Only one selector per bank; owner says simultaneous pushes resolve to leftmost.
+Physical memories are miniature slider/switch panels, not recording of knob
+positions. Settings are copied by eye and fine-tuned by ear. The owner recommends
+copying panel II to memory1/2 or panel I to memory3/4 for cross-bank A/B comparison;
+that does NOT change which bank each memory actually belongs to.
+Fixed preset control values are resistor/diode matrix networks (T51-T54). The
+owner's pp32-34 charts are approximate panel equivalents, not exact numeric
+factory presets. Do not invent patch values or treat chart OCR as numeric data.
+
+12. NUMERIC LIMITS AND REMAINING WORK
+Owner p53 and service p43 chip descriptions.
+Voice/filter attack about 1ms-1s; decay/release about 10ms-10s. EG drawings show
+curved transitions; a linear ramp is not automatically equivalent. Values are
+nominal ranges and do not establish the entire slider taper.
+Read and retain a distinction between documented behavior, schematic inference,
+and measured analog behavior. Not yet established: exact slider-to-control laws,
+filter nonlinearity/resonance limits, oscillator harmonics/phase relations, PWM
+range/clipping, initial-pulse time constants, pressure combining for common speed,
+full allocator edge cases, sustain/release combination, ribbon endpoints/return
+laws, BBD clock/filter/mix laws, exact factory preset voltages, calibrated
+voice-to-voice variation and drift. No claim of hardware-validated sonic identity.
+Future AU design must provide polyphonic pressure input (plus explicit fallback
+for controllers without it), correct host event timing and state/automation, while
+retaining the user's request for procedural wave generation and original controls.
+The immediate user request remains study and questions, not implementation.

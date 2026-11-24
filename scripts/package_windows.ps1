@@ -15,11 +15,11 @@ $env:CS80MATHS_TEST_ROOT = Join-Path $PWD 'win-release/install-test'
 $env:CS80MATHS_TEST_MODE = '1'
 New-Item -ItemType Directory -Force "$env:CS80MATHS_TEST_ROOT/presets" | Out-Null
 Set-Content "$env:CS80MATHS_TEST_ROOT/presets/keep.txt" 'User data'
-& cmd /c "$stage/Install cs80maths.cmd"
+& "$stage/Install cs80maths.cmd"
 if ($LASTEXITCODE -ne 0) { throw 'Installer failed' }
 $installed = "$env:CS80MATHS_TEST_ROOT/VST3/Direct Grooves/cs80maths.vst3"
 if (!(Test-Path "$installed/Contents/x86_64-win/cs80maths.vst3")) { throw 'Plugin not installed' }
-& cmd /c "$stage/Uninstall cs80maths.cmd"
+& "$stage/Uninstall cs80maths.cmd"
 if ($LASTEXITCODE -ne 0 -or (Test-Path $installed)) { throw 'Uninstaller failed' }
 if (!(Test-Path "$env:CS80MATHS_TEST_ROOT/presets/keep.txt")) { throw 'Uninstaller removed user data' }
 'PASS Windows installer/uninstaller in isolated directory; user data retained.' | Tee-Object -FilePath win-release/installer-test.txt

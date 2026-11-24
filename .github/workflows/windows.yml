@@ -19,8 +19,14 @@ jobs:
           git -C sdk submodule update --init --depth 1 base cmake pluginterfaces public.sdk
       - name: Configure Windows x64
         run: cmake -S . -B win-build -A x64 -DVST3_SDK_ROOT="${{ github.workspace }}/sdk"
-      - name: Build and run Steinberg validator
+      - name: Build Windows plugin and tests
         run: cmake --build win-build --config Release --target cs80maths cs80maths_tests --parallel 4
+      - name: Validate VST3 with Steinberg validator
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force win-release | Out-Null
+          & ./win-build/bin/Release/validator.exe ./win-build/VST3/Release/cs80maths.vst3 2>&1 | Tee-Object -FilePath win-release/vst3-validator.txt
+          if ($LASTEXITCODE -ne 0) { throw 'VST3 validation failed' }
       - name: Test wrapper and native editor
         run: ctest --test-dir win-build -C Release --output-on-failure
       - name: Package and test installer and uninstaller

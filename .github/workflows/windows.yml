@@ -20,7 +20,7 @@ jobs:
       - name: Configure Windows x64
         run: cmake -S . -B win-build -A x64 -DVST3_SDK_ROOT="${{ github.workspace }}/sdk"
       - name: Build Windows plugin and tests
-        run: cmake --build win-build --config Release --target cs80maths cs80maths_tests --parallel 4
+        run: cmake --build win-build --config Release --target cs80maths cs80maths_tests validator --parallel 4
       - name: Validate VST3 with Steinberg validator
         shell: pwsh
         run: |

@@ -1,0 +1,36 @@
+name: Windows VST3
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned MIT VST3 SDK
+        shell: pwsh
+        run: |
+          git clone --filter=blob:none https://github.com/steinbergmedia/vst3sdk.git sdk
+          git -C sdk checkout 3cdf9ca5d1f5b1b21e0a86832aa4abe55607bd96
+          git -C sdk submodule update --init --depth 1 base cmake pluginterfaces public.sdk
+      - name: Configure Windows x64
+        run: cmake -S . -B win-build -A x64 -DVST3_SDK_ROOT="${{ github.workspace }}/sdk"
+      - name: Build and run Steinberg validator
+        run: cmake --build win-build --config Release --target cs80maths cs80maths_tests --parallel 4
+      - name: Test wrapper and native editor
+        run: ctest --test-dir win-build -C Release --output-on-failure
+      - name: Package and test installer and uninstaller
+        shell: pwsh
+        run: ./scripts/package_windows.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cs80maths-windows-x64
+          path: |
+            win-release/*.zip
+            win-release/*.txt
+            win-build/Testing/Temporary/LastTest.log
+          if-no-files-found: error

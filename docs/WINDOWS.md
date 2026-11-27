@@ -1,6 +1,6 @@
 # cs80maths for Windows — Direct Grooves
 
-Windows 10/11 x64 VST3 instrument. A VST3-compatible DAW is required; this download does not include a standalone Windows app. The DSP is shared with the macOS version. The native Windows fader editor provides both voice panels, all four memory editors, performance-control groups, tone selectors and eight performance presets. Choose Panel or the corresponding Memory under Tone selectors to hear edits. Use your DAW's keyboard/MIDI input to play. Polyphonic pressure and channel pressure are supported; optional MPE has the same mapping as the macOS implementation.
+Windows 10/11 x64 VST3 instrument. A VST3-compatible DAW is required; this download does not include a standalone Windows app. The DSP is shared with the macOS version. The native Windows fader editor provides both voice panels, all four memory editors, performance-control groups, tone selectors and 38 performance presets. Choose Panel or the corresponding Memory under Tone selectors to hear edits. Use your DAW's keyboard/MIDI input to play. Polyphonic pressure and channel pressure are supported; optional MPE has the same mapping as the macOS implementation.
 
 ## Install and uninstall
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(cs80maths VERSION 0.3.0 LANGUAGES CXX)
+project(cs80maths VERSION 0.4.0 LANGUAGES CXX)
 if(NOT WIN32)
  message(FATAL_ERROR "This CMake build is for Windows VST3. Use scripts/build.sh for macOS AUv3.")
 endif()

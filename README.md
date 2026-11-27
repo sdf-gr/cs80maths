@@ -4,7 +4,7 @@ A free synthesizer from Direct Grooves, supplied as a Windows x64 VST3 instrumen
 
 This is a working first implementation of the documented architecture, **not yet a calibrated replica**. Read [the accuracy report](docs/ACCURACY.md) for the specific approximations. The supplied Yamaha manuals remain the source reference; no Yamaha code or commercial plugin assets are used.
 
-Version 0.3.0 adds Windows VST3 and uninstallers for both platforms. Version 0.2.1 smooths pressure, pitch bend, continuous MIDI controls and filter changes, and fixes pedal-release discontinuities. Version 0.2.0 added a CS-80-style panel with colored vertical faders, a memory-cover editor, and eight original Vangelis-inspired performance presets. The click fixes from 0.1.1 are retained. Quit an older running app and unload/reload the AU instance after updating.
+Version 0.4.0 adds 30 original cinematic and classic CS-80-inspired presets, bringing the performance bank to 38. Existing presets and project mappings are retained. Both platform downloads still include an uninstaller. Quit the old app or reload the plugin after updating.
 
 ## Open and play
 
@@ -86,4 +86,4 @@ These need access to macOS audio and extension services; a restrictive shell san
 
 See [Windows instructions](docs/WINDOWS.md). The GitHub Actions workflow compiles and validates Windows builds remotely. No Windows tools need installing on a Mac. Both binary downloads include an uninstaller.
 
-Build and test the macOS release with scripts/build.sh and scripts/test.sh. Download the successful Windows workflow artifact to dist/releases, then run scripts/package_release.py --windows dist/releases/cs80maths-0.3.0-Windows-x64-VST3.zip --site /Users/djazz/code/directgrooves-finall/new. Check the local site before running its deploy.sh. Release metadata and assets are staged locally; packaging never edits the live site directly.
+Build and test the macOS release with scripts/build.sh and scripts/test.sh. Download the successful Windows workflow artifact to dist/releases, then run scripts/package_release.py --windows dist/releases/cs80maths-0.4.0-Windows-x64-VST3.zip --site /Users/djazz/code/directgrooves-finall/new. Check the local site before running its deploy.sh. Release metadata and assets are staged locally; packaging never edits the live site directly.

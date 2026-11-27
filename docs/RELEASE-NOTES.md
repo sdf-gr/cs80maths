@@ -1,16 +1,11 @@
-# cs80maths 0.3.0 — Direct Grooves
+# cs80maths 0.4.0 — Direct Grooves
 
-24 November 2026
+27 November 2026
 
-- Added a Windows x64 VST3 instrument, built remotely without installing Windows development tools on the Mac.
-- Added uninstallers to both macOS and Windows downloads. Both keep user presets and settings.
-- Added the supplied product screenshot and fader logo to the software page.
-- Renamed the app, instrument panel and Audio Unit listing to cs80maths from Direct Grooves. Existing Audio Unit and parameter identifiers remain compatible.
-- Includes the 0.2.1 fixes: smoothed pressure and pitch bend, continuous MIDI controller ramps, interpolated filter changes, and continuous pedal-release cancellation.
-- CS-80-style colored faders, two programming panels, memory editing, ribbon, ring modulation and stereo effects.
-- Eight original cinematic presets, including Horizon Brass. They are inspired by expressive synthesizer performances; they are not official Vangelis presets.
-- Eight-note, dual-layer synthesis with mathematical saw, pulse and sine oscillators; no sampled oscillator recordings.
-- Standalone macOS app and embedded AUv3 instrument; Apple Silicon and Intel builds, macOS 13 or later.
-- Free source code under the MIT license, plus a text-only essay explaining the original CS-80 electronics and connections.
+- Added 30 original cinematic and classic CS-80-inspired sounds, for 38 performance presets total.
+- Includes brass, evolving pads, choirs, strings, expressive leads, bells, basses, organs, electric keys and plucked sounds. See PRESET-CATALOG.md for all additions and playing notes.
+- Preserved the original eight patches and Audio Unit preset numbers. Windows retains the original preset automation mapping and adds a separate bank for the new sounds.
+- Both platforms share the same preset recipes and mathematical synthesis engine.
+- macOS app + AUv3, Windows x64 VST3, both uninstallers, free source code and the CS-80 essay remain included.
 
-The model remains an uncalibrated software approximation. It is not a component-exact recreation or an established sonic match to an original CS-80. The direct-download build is ad-hoc signed and is not notarized by Apple.
+These are original inspired patches, not official Vangelis presets or calibrated copies of a particular CS-80. The sound model remains an uncalibrated approximation. Windows is unsigned; macOS is ad-hoc signed and not notarized.

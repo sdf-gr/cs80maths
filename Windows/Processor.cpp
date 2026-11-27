@@ -11,7 +11,7 @@ tresult PLUGIN_API Processor::setBusArrangements(SpeakerArrangement* ins,int32 n
 void Processor::change(ParamID id,double v){
  if(!std::isfinite(v))return;
  if(id<cs80::ParameterCount){engine.eventParameter(int(id),plain(specs[id],v),uint32(processSetup.sampleRate*.005));return;}
- if(id==PresetID){selected=int(std::round(std::clamp(v,0.,1.)*cs80::PerformancePresetCount));if(selected){auto p=cs80::performancePreset(selected-1);for(int i=0;i<cs80::ParameterCount;i++){if(i==cs80::MPE||i==cs80::Expression||i==cs80::FootSwitch||i==cs80::PedalConnected||i==cs80::OutputLow||i>=cs80::MemoryBase)continue;engine.eventParameter(i,p.values[i],uint32(processSetup.sampleRate*.005));}}return;}
+ if(id==PresetID||id==AdditionalPresetID){int choice=int(std::round(std::clamp(v,0.,1.)*(id==PresetID?8:AdditionalPresetCount)));selected=choice+(id==AdditionalPresetID&&choice?8:0);if(selected){auto p=cs80::performancePreset(selected-1);for(int i=0;i<cs80::ParameterCount;i++){if(i==cs80::MPE||i==cs80::Expression||i==cs80::FootSwitch||i==cs80::PedalConnected||i==cs80::OutputLow||i>=cs80::MemoryBase)continue;engine.eventParameter(i,p.values[i],uint32(processSetup.sampleRate*.005));}}return;}
  if(id<MidiBase||id>=MidiBase+MidiCount)return;
  int channel=int(id-MidiBase)/130,cc=int(id-MidiBase)%130;
  v=std::clamp(v,0.,1.);
@@ -40,5 +40,5 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
  return kResultOk;
 }
 tresult PLUGIN_API Processor::getState(IBStream*stream){IBStreamer s(stream,kLittleEndian);if(!s.writeInt32(0x4353384d)||!s.writeInt32(1)||!s.writeInt32(selected))return kResultFalse;for(int i=0;i<cs80::ParameterCount;i++)if(!s.writeFloat(engine.get(i)))return kResultFalse;return kResultOk;}
-tresult PLUGIN_API Processor::setState(IBStream*stream){IBStreamer s(stream,kLittleEndian);int32 magic=0,version=0,preset=0;std::array<float,cs80::ParameterCount>values{};if(!s.readInt32(magic)||magic!=0x4353384d||!s.readInt32(version)||version!=1||!s.readInt32(preset)||preset<0||preset>8)return kResultFalse;for(auto&v:values)if(!s.readFloat(v)||!std::isfinite(v))return kResultFalse;for(int i=0;i<cs80::ParameterCount;i++)engine.eventParameter(i,values[i]);selected=preset;engine.reset();return kResultOk;}
+tresult PLUGIN_API Processor::setState(IBStream*stream){IBStreamer s(stream,kLittleEndian);int32 magic=0,version=0,preset=0;std::array<float,cs80::ParameterCount>values{};if(!s.readInt32(magic)||magic!=0x4353384d||!s.readInt32(version)||version!=1||!s.readInt32(preset)||preset<0||preset>cs80::PerformancePresetCount)return kResultFalse;for(auto&v:values)if(!s.readFloat(v)||!std::isfinite(v))return kResultFalse;for(int i=0;i<cs80::ParameterCount;i++)engine.eventParameter(i,values[i]);selected=preset;engine.reset();return kResultOk;}
 }

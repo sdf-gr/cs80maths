@@ -12,6 +12,8 @@ using namespace Steinberg::Vst;
 inline const FUID ProcessorUID(0x88B04B21,0xECFA4698,0x99070580,0xDB816301);
 inline const FUID ControllerUID(0x9623D02A,0x490447E2,0x8CF82780,0x87B3A8E6);
 constexpr ParamID PresetID=cs80::ParameterCount;
+constexpr ParamID AdditionalPresetID=PresetID+1;
+constexpr int AdditionalPresetCount=cs80::PerformancePresetCount-cs80::LegacyPerformancePresetCount;
 constexpr ParamID MidiBase=1000;
 constexpr int MidiCount=16*130;
 constexpr int MaxQueues=MidiBase+MidiCount;
@@ -45,6 +47,7 @@ public:
  tresult PLUGIN_API setParamNormalized(ParamID,ParamValue) override;
  tresult PLUGIN_API getMidiControllerAssignment(int32 bus,int16 channel,CtrlNumber number,ParamID& id) override;
  IPlugView* PLUGIN_API createView(FIDString) override;
+ int selectedPreset(){int n=int(std::round(getParamNormalized(AdditionalPresetID)*AdditionalPresetCount));return n?n+8:int(std::round(getParamNormalized(PresetID)*8));}
  void choosePreset(int index);void edit(ParamID,double);
  OBJ_METHODS(Controller,EditController)
  DEFINE_INTERFACES

@@ -38,7 +38,7 @@ struct RenderStorage {cs80::Engine engine;std::vector<float>left,right,inLeft,in
 }
 - (AUAudioUnitBusArray*)outputBusses{return _outputs;}
 - (AUAudioUnitBusArray*)inputBusses{return _inputs;}
-- (uint32_t)componentVersion{return 0x00010300;}
+- (uint32_t)componentVersion{return 0x00010400;}
 - (BOOL)isMusicDeviceOrEffect{return YES;}
 - (BOOL)canProcessInPlace{return NO;}
 - (MIDIProtocolID)audioUnitMIDIProtocol{return kMIDIProtocol_1_0;}

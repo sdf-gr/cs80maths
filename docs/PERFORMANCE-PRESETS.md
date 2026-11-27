@@ -24,3 +24,7 @@ Exported `.aupreset` files are in `output/presets/`. They can be loaded through 
 **Memory Bank / Open Cover** opens the four memory panels. Choose a memory, edit its faders, copy from its associated channel panel if needed, and use **Select This Memory** to route it into the corresponding bank. Close the cover to return to both main programming rows.
 
 The editor follows the CS-80's functional panel arrangement and fader colors, with software additions for preset browsing, memory copying, numerical readouts, window scaling, and MIDI settings. It is not a dimensional or photographic reproduction. The separate sonic-calibration limitations in `ACCURACY.md` still apply.
+
+## Expanded bank — version 0.4.0
+
+Thirty additional original cinematic and classic CS-80-inspired patches bring the total to 38. See PRESET-CATALOG.md for names and playing notes. Original indices 0–7 remain unchanged. The VST3 original bank retains its eight-step automation mapping; a new parameter selects the additional 30.

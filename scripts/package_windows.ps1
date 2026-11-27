@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$version = '0.3.0'
+$version = '0.4.0'
 $bundle = Get-ChildItem win-build -Recurse -Directory -Filter 'cs80maths.vst3' | Where-Object { Test-Path (Join-Path $_.FullName 'Contents/x86_64-win/cs80maths.vst3') } | Select-Object -First 1
 if (!$bundle) { throw 'Built VST3 bundle not found' }
 $stage = Join-Path $PWD 'win-release/cs80maths-Windows'
